@@ -9,9 +9,16 @@ Scheduling Simulator 2014 will fulfill your lifelong dream to visualize differen
 on a sample data set. It shows, in real time, every step the process scheduler takes as it juggles the various
 processes vying for computational time on the CPU.
 
+It was created using node-webkit, a library for creating standalone applications that use HTML, Javascript, and
+Node.js. It also uses Angular.js and Bootstrap.
+
 STARTING
 --------
-Run scheduling_simulator.exe
+Assuming you received a prebundled version, you just need to double click on "scheduling_simulator.exe"
+
+If you didn't (perhaps you cloned this from Github), you need to grab the correct version of the node-webkit binary
+for your OS, extract it, and then copy paste all of these files into that folder. Then double click on whatever
+binary was extracted to start the application.
 
 LAYOUT
 ------
