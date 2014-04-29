@@ -82,6 +82,7 @@ schedulingApp.controller('jobController', function ($scope, $interval) {
     // Reset the running status values
     var resetStatus = function() {
         running = undefined;
+        $scope.buttonsDisabled = false;
         $scope.inactiveJobs = undefined;
         $scope.waitingJobs = undefined;
         $scope.currentTime = undefined;
@@ -94,6 +95,9 @@ schedulingApp.controller('jobController', function ($scope, $interval) {
         
         // Show the cancel button
         $scope.showCancelBtn = true;
+        
+        // Deactivate the algorithm buttons
+        $scope.buttonsDisabled = true;
         
         // Waiting jobs (arrived, but are queued) and inactive jobs (not yet arrived) are
         // arrays
@@ -276,7 +280,7 @@ schedulingApp.controller('jobController', function ($scope, $interval) {
     };
     
     $scope.rr = function () {
-        runAlgorithm($scope.stats.rr, function () {
+        runAlgorithm($scope.statsList.sjn, function () {
             var timeQuantum = 4;
             if ($scope.currentJob) {
                 $scope.currentJob.cyclesAllotted++;
