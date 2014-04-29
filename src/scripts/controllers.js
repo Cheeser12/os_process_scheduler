@@ -10,6 +10,7 @@ schedulingApp.controller('jobController', function ($scope, $interval) {
         this.cycleTime = cycleTime;
         this.waitingTime = 0;
         this.cyclesDone = 0;
+        this.cyclesAllotted = 0;
         
         this.remainingCycles = function () {
             return this.cycleTime - this.cyclesDone;
@@ -18,10 +19,10 @@ schedulingApp.controller('jobController', function ($scope, $interval) {
     
     // Initialize jobs
     $scope.jobs = [
-        new Job("A", 0, 6),
-        new Job("B", 1, 3),
-        new Job("C", 2, 1),
-        new Job("D", 3, 4),
+        new Job("A", 0, 8),
+        new Job("B", 1, 4),
+        new Job("C", 2, 9),
+        new Job("D", 3, 5)
         /*
         new Job("E", 10, 1),
         new Job("F", 12, 9),
@@ -126,7 +127,7 @@ schedulingApp.controller('jobController', function ($scope, $interval) {
         // Set the background in the table for this job as green (running)
         $scope.currentJob.tableClass = "success";
         $scope.currentJob.status = "Running";
-    }
+    };
     
     // Unsets the current job. If 'finished', calcualtes the statistics and marks it as done
     // Otherwise, we put it back in the waiting queue
@@ -141,11 +142,11 @@ schedulingApp.controller('jobController', function ($scope, $interval) {
             // The job is back in the waiting queue, set it to yellow (waiting)
             $scope.currentJob.tableClass = "warning";
             $scope.currentJob.status = "Waiting";
-            $scope.waitingJobs.push($scope.currentJob)
+            $scope.waitingJobs.push($scope.currentJob);
         }
                 
         $scope.currentJob = undefined;
-    }
+    };
     
     var runJobCycle = function() {
         // Perform a cycle for the current job
@@ -269,6 +270,29 @@ schedulingApp.controller('jobController', function ($scope, $interval) {
                         // Remove this entry from the waiting list and make it the current job
                         setCurrentJob($scope.waitingJobs.splice(srtJobIndex, 1)[0]);
                     }
+                }
+            }
+        });
+    };
+    
+    $scope.rr = function () {
+        runAlgorithm(function () {
+            var timeQuantum = 4;
+            if ($scope.currentJob) {
+                $scope.currentJob.cyclesAllotted++;
+            }
+            if ($scope.waitingJobs.length > 0) {
+                // If we don't have a current job, get the first one from the queue
+                if(!$scope.currentJob) {
+                    setCurrentJob($scope.waitingJobs.shift());
+                } 
+                // Otherwise, we need to check the time allotted to the process in this iteration.
+                // If its > timeQuantum, we'll unset this job, put in the back of the queue, and
+                // set the next process in the queue as the current job
+                else if($scope.currentJob.cyclesAllotted >= timeQuantum) {
+                    $scope.currentJob.cyclesAllotted = 0;
+                    unsetCurrentJob(false);
+                    setCurrentJob($scope.waitingJobs.shift());
                 }
             }
         });
