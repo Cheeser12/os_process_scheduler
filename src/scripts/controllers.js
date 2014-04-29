@@ -19,14 +19,13 @@ schedulingApp.controller('jobController', function ($scope, $interval) {
     
     // Initialize jobs
     $scope.jobs = [
-        new Job("A", 0, 8),
-        new Job("B", 1, 4),
-        new Job("C", 2, 9),
-        new Job("D", 3, 5)
-        /*
+        new Job("A", 0, 16),
+        new Job("B", 3, 2),
+        new Job("C", 5, 11),
+        new Job("D", 9, 6),
         new Job("E", 10, 1),
         new Job("F", 12, 9),
-        new Job("G", 14, 4)*/
+        new Job("G", 14, 4)
     ];
     
     // Initialize stats dictionary
