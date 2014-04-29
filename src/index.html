@@ -51,7 +51,7 @@
             <button id="rrBtn" type="button" class="btn btn-default" ng-click="rr()" ng-disabled="buttonsDisabled">Round Robin (4s)</button>
         </div>
     </div>
-    
+    <br />
     <!-- Averages -->
     <div class="row">
         <div>
@@ -71,8 +71,10 @@
                 <div class="col-sm-2">
                     <input type="text" class="form-control" id="averageTurnaround" value={{averageTurnaroundTime}} disabled>
                 </div>
-            </div>
-            <button type="button" class="btn btn-danger" ng-show="showCancelBtn" ng-click="cancel(false)">STOP!</button>
+                <div class="col-sm-1 col-sm-offset-1">
+                    <button type="button" class="btn btn-danger" ng-show="showCancelBtn" ng-click="cancel(false)">STOP SIMULATION!</button>
+                </div>
+            </div>  
         </form>
         </div>
     </div> 
