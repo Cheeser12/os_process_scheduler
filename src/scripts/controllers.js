@@ -29,7 +29,7 @@ schedulingApp.controller('jobController', function ($scope, $interval) {
     ];
     
     // Initialize stats dictionary
-    $scope.stats = {"fcfsStats": {}, "sjnStats": {}, "srtStats": {}, "rrStats": {}};
+    $scope.statsList = {"fcfs": {"name": "FCFS"}, "sjn": {"name": "SJN"}, "srt": {"name": "SRT"}, "rr": {"name": "RR"}};
     
     // Whether or not to disable the algorithm buttons
     $scope.buttonsDisabled = false;
@@ -90,8 +90,7 @@ schedulingApp.controller('jobController', function ($scope, $interval) {
     
     var initializeAlgorithm = function (chooseNewJob) {
         // Reset everything
-        resetStats();
-        resetStatus();
+        $scope.cancel(false);
         
         // Show the cancel button
         $scope.showCancelBtn = true;
@@ -132,8 +131,10 @@ schedulingApp.controller('jobController', function ($scope, $interval) {
     // Otherwise, we put it back in the waiting queue
     var unsetCurrentJob = function(finished) {
         if (finished) {
+            // Show the stats for this current algorithm
             $scope.currentJob.turnaroundTime = $scope.currentTime - $scope.currentJob.arrivalTime;
             $scope.currentJob.finishTime = $scope.currentTime;
+            
             // Set the job background to blue (finished)
             $scope.currentJob.tableClass = "info";
             $scope.currentJob.status = "Finished";
@@ -161,7 +162,8 @@ schedulingApp.controller('jobController', function ($scope, $interval) {
     // the algorithm has ended, etc.
     // The only difference is how they choose the next job. So, all algorithms call this base method
     // and pass in the logic for getting the next job
-    var runAlgorithm = function(chooseNewJob) {
+    // Also pass in the stats object to assign to
+    var runAlgorithm = function(stats, chooseNewJob) {
         initializeAlgorithm(chooseNewJob);
         
         // Every second...
@@ -173,16 +175,15 @@ schedulingApp.controller('jobController', function ($scope, $interval) {
             // when they "arrive"
             activateJobs();
             
+            // Run a cycle for the current job
             runJobCycle();
+            
             // Run logic for choosing a next job
-            chooseNewJob();
-                   
-            // Run a cycle for the job, and check if it has finished
-            //runJobCycle();  
+            chooseNewJob(); 
             
             // Check if we're done (no job currently running, no jobs waiting, no jobs yet to arrive)
             if (!$scope.currentJob && $scope.waitingJobs.length === 0 && $scope.inactiveJobs.length === 0) {
-                $scope.cancel(true);
+                $scope.cancel(true, stats);
             }
             
             // Loop through the waiting jobs queue and increment wait time
@@ -196,7 +197,7 @@ schedulingApp.controller('jobController', function ($scope, $interval) {
     };
 
     $scope.fcfs = function() {
-        runAlgorithm(function() {
+        runAlgorithm($scope.statsList.fcfs, function() {
             // Check if we have a current job; if we don't, get the first
             // one in the queue (first come first served) or just do nothing if no jobs are available
             if (!$scope.currentJob && $scope.waitingJobs.length > 0) {
@@ -208,7 +209,7 @@ schedulingApp.controller('jobController', function ($scope, $interval) {
     };
     
     $scope.sjn = function() {
-        runAlgorithm(function() {
+        runAlgorithm($scope.statsList.sjn, function() {
             // Check if we have a current job; if we don't, get the one which has the shortest time
             if (!$scope.currentJob && $scope.waitingJobs.length > 0) {
                 // If we have only one waiting job, make that the current job
@@ -235,7 +236,7 @@ schedulingApp.controller('jobController', function ($scope, $interval) {
     };
 
     $scope.srt = function() {
-        runAlgorithm(function() {
+        runAlgorithm($scope.statsList.srt, function() {
             // Even if we have a current job, a waiting job can pre-empt it if it has a shorter
             // remaining time
             if ($scope.waitingJobs.length > 0) {
@@ -275,7 +276,7 @@ schedulingApp.controller('jobController', function ($scope, $interval) {
     };
     
     $scope.rr = function () {
-        runAlgorithm(function () {
+        runAlgorithm($scope.stats.rr, function () {
             var timeQuantum = 4;
             if ($scope.currentJob) {
                 $scope.currentJob.cyclesAllotted++;
@@ -310,7 +311,7 @@ schedulingApp.controller('jobController', function ($scope, $interval) {
     // Cancels the running algorithm
     // if saveStats is true, will only stop the algorithm but preserve all stats
     // and tally results
-    $scope.cancel = function(saveStats) {
+    $scope.cancel = function(saveStats, stats) {
         // If an algorithm is running, stop it and clear all variables
         // related to it
         if (angular.isDefined(running)) {
@@ -334,8 +335,13 @@ schedulingApp.controller('jobController', function ($scope, $interval) {
                     return job.turnaroundTime;
                 });
                 
-                $scope.averageWaitingTime = average(waitingTimes);
-                $scope.averageTurnaroundTime = average(turnaroundTimes);
+                // Set the text output for this algorithm
+                $scope.averageWaitingTime = average(waitingTimes).toFixed(2);
+                $scope.averageTurnaroundTime = average(turnaroundTimes).toFixed(2);
+                
+                // Set the output in the algorithm comparison table
+                stats.avgWaitTime = $scope.averageWaitingTime;
+                stats.avgTurnaroundTime = $scope.averageTurnaroundTime;
             }
         }
     };
